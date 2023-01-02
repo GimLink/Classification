@@ -37,11 +37,13 @@ def main(opt):
     # dataset
     train_data = custom_dataset(file_path=opt.train_path, transform=train_transform)
     val_data = custom_dataset(file_path=opt.val_path, transform=val_transform)
+    test_data = custom_dataset(file_path=opt.test_path, transform = val_transform)
 
     # dataloader
     train_loader = DataLoader(
         train_data, batch_size=opt.batch_size, shuffle=True)
     val_loader = DataLoader(val_data, batch_size=opt.batch_size, shuffle=True)
+    test_loader = DataLoader(test_data, batch_size=1, shuffle = False)
 
     # model call
     net = models.__dict__['resnet50'](pretrained=True)
@@ -64,7 +66,12 @@ def main(opt):
     os.makedirs(save_dir, exist_ok=True)
 
     # train(num_epoch, model, train_loader, val_loader, criterion, optimizer, scheduler, save_dir, device):
-    train(opt.epoch, net, train_loader, val_loader, criterion, optimizer, scheduler, save_dir, device )
+    train_flg = opt.train_flag
+    if train_flg == True:
+        train(opt.epoch, net, train_loader, val_loader, criterion, optimizer, scheduler, save_dir, device )
+    else:
+        # test_species(test_loader, device)
+        test_show(test_loader, device)
 
     # train
 def parse_opt():
@@ -73,6 +80,8 @@ def parse_opt():
                         default='Python/1230/archive/train', help='train data path')
     parser.add_argument(
         '--val-path', type=str, default='Python/1230/archive/valid', help='val data path')
+    parser.add_argument('--train-flag', type = bool, default = False, help = 'train or test mode flag')
+    parser.add_argument('--test-path', type = str, default = 'Python/1230/archive/test', help = 'test path')
     parser.add_argument('--batch-size', type=int,
                         default= 128, help='batch size')
     parser.add_argument('--epoch', type=int,
